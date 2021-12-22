@@ -47,3 +47,26 @@ create view dbo.[Niezrealizowanie zamowienia] as
 from Zamówienia
 where Zamówienia.data_odebrania is null
 order by data_oczekiwanej_realizacji
+
+-- Wybierz aktualnie zatrudnionych pracowników
+create view dbo.Aktialni_pracownicy as
+select *
+from Pracownicy
+WHERE data_zwolnienia IS NULL
+  AND data_zatrudnienia <= current_timestamp
+
+create view dbo.Aktualni_managerowie as
+select * from Aktualni_pracownicy where czy_manager = 1
+
+-- wybierz aktualnie "działające" stoliki (najnowszy opis i liczba miejsc)
+with tab as
+         (
+             select s.id_stołu, s.liczba_miejsc, s.opis, s.data_wprowadzenia
+             from Stoliki_szczegóły as s
+			 LEFT OUTER JOIN stoliki on s.id_stołu = stoliki.id_stołu
+			 where stoliki.czy_aktualnie_istnieje = 1
+         )
+select T1.liczba_miejsc, T1.opis
+from tab T1
+         left outer join tab T2 on T1.data_wprowadzenia < T2.data_wprowadzenia and T1.id_stołu = T2.id_stołu
+where T2.id_stołu is null
