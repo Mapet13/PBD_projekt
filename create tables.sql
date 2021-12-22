@@ -7,7 +7,7 @@ create table Produkty
 	nazwa nvarchar(50),
 	czy_zawiera_owoce_morza bit,
 	id_kategorii int,
-	data_dodania datetime
+	data_dodania datetime default current_timestamp
 
 	primary key (id_produktu)
 )
@@ -16,7 +16,7 @@ drop table if exists Stoliki
 create table Stoliki
 (
 	id_stołu int identity,
-	data_dodania datetime,
+	data_dodania datetime default current_timestamp,
 	czy_aktualnie_istnieje bit
 
 	primary key (id_stołu)
@@ -48,7 +48,7 @@ drop table if exists Menu
 create table Menu
 (
 	id_menu int identity,
-	data_wprowadzenia datetime,
+	data_wprowadzenia datetime default current_timestamp,
 	id_pracownika_wprowadzającego int
 
 	primary key (id_menu)
@@ -59,7 +59,7 @@ create table Faktury
 (
 	id_faktury int identity,
 	id_klienta int,
-	data_wystawienia datetime,
+	data_wystawienia datetime default current_timestamp,
 	czy_faktura_miesięczna bit,
 	id_pracownika_wystawiającego int
 
@@ -71,7 +71,7 @@ create table Produkty_szczegóły
 (
 	id_produktu int,
 	cena money,
-	data_wprowadzenia datetime,
+	data_wprowadzenia datetime default current_timestamp,
 	id_pracownika_dodającego int
 
 	primary key (id_produktu,data_wprowadzenia)
@@ -91,7 +91,7 @@ create table Stoliki_szczegóły
 (
 	id_stołu int,
 	liczba_miejsc int,
-	data_wprowadzenia datetime,
+	data_wprowadzenia datetime default current_timestamp,
 	id_pracownika_dodającego int,
 	opis text
 
@@ -175,7 +175,7 @@ drop table if exists Zamówienia
 create table Zamówienia
 (
 	id_zamówienia int identity,
-	data_złorzenia_zamówienia datetime,
+	data_złorzenia_zamówienia datetime default current_timestamp,
 	czy_na_wynos bit,
 	id_rabatu int null,
 	data_oczekiwanej_realizacji datetime,
@@ -192,7 +192,7 @@ create table Przyznane_rabaty
 (
 	id_rabatu int identity,
 	id_klienta int,
-	data_przyznania datetime
+	data_przyznania datetime default current_timestamp
 
 	primary key (id_rabatu)
 )
@@ -221,7 +221,7 @@ drop table if exists Klienci
 create table Klienci
 (
 	id_klienta int identity,
-	data_dodania datetime,
+	data_dodania datetime default current_timestamp,
 	email nvarchar(200),
 	adres nvarchar(200)
 
@@ -239,7 +239,7 @@ create table Stałe
 	K2 money,
 	R2 float,
 	D1 int,
-	data_wprowadzenia datetime,
+	data_wprowadzenia datetime default current_timestamp,
 	id_pracownika_wprowadzającego int
 
 	primary key (data_wprowadzenia)
@@ -342,12 +342,5 @@ alter table Rezerwacje add foreign key (id_klienta) references Klienci(id_klient
 
 alter table Produkty add foreign key (id_kategorii) references Kategorie_produktów(id_kategorii)
 
+
 alter table Rezerwacje_indywidualne	add [Czy rozpatrzona] bit default 0
-
-
-
-
-
-
-
-
