@@ -387,18 +387,17 @@ alter table Zamówienia add constraint CK_data_złorzenia_zamówienia check (dat
 alter table Stałe add constraint CK_Data check (data_wprowadzenia >= current_timestamp)
 
 
-alter table Pracownicy add constraint CK_data_urodzenia check (  -- sprawdzanie czy sie zgadza z numerem PESEL
-    trim(cast(year(data_urodzenia) % 100 as char))+
-    trim(cast(month(data_urodzenia) + case
+alter table Pracownicy add constraint CK_data_urodzenia check ( -- sprawdzanie czy sie zgadza z numerem PESEL
+    RIGHT('00'+CAST(year(data_urodzenia) % 100 AS VARCHAR(2)),2)+
+       RIGHT('00'+CAST(month(data_urodzenia) + case
         when 2000<= year(data_urodzenia) and year(data_urodzenia) <=2099 then 20
         when 2100<= year(data_urodzenia) and year(data_urodzenia) <=2199 then 40
         when 2200<= year(data_urodzenia) and year(data_urodzenia) <=2299 then 60
         when 1800<= year(data_urodzenia) and year(data_urodzenia) <=1899 then 80
         when 1900<= year(data_urodzenia) and year(data_urodzenia) <=1999 then 0
-        end as char))+
-    trim(cast(day(data_urodzenia) as char)) = substring(Pesel,1,6)
+        end AS VARCHAR(2)),2)+
+       RIGHT('00'+CAST(day(data_urodzenia) % 100 AS VARCHAR(2)),2) = substring(Pesel,1,6)
     )
-
 
 -- ograniczenia logiczne na daty:
 alter table Zamówienia add constraint CK_data_oczekiwanej_realizacji check (data_oczekiwanej_realizacji >= Zamówienia.data_złorzenia_zamówienia)
