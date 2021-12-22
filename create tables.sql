@@ -342,6 +342,7 @@ alter table Rezerwacje add foreign key (id_klienta) references Klienci(id_klient
 
 alter table Produkty add foreign key (id_kategorii) references Kategorie_produktów(id_kategorii)
 
+alter table Rezerwacje_indywidualne	add [Czy rozpatrzona] bit default 0
 
 
 

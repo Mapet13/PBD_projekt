@@ -29,3 +29,21 @@ as
         select Acp.id_produktu,Acp.cena from tab
         join Menu_szczegóły MS on MS.id_menu = tab.id_menu
         join Aktualne_ceny_produktów Acp on MS.id_produktu = Acp.id_produktu;
+
+create view dbo.[Rezerwacje na dzis] as
+    select id_rezerwacji,data_rezerwacji
+from Rezerwacje
+where DAY(data_rezerwacji) = DAY(current_timestamp) and MONTH(data_rezerwacji) = MONTH(current_timestamp) and YEAR(data_rezerwacji) = YEAR(current_timestamp)
+
+create view dbo.[Nierozpatrzone rezerwacje] as
+select top 100 Rezerwacje.id_rezerwacji,id_klienta,liczba_osób
+from Rezerwacje
+    inner join Rezerwacje_indywidualne Ri on Rezerwacje.id_rezerwacji = Ri.id_rezerwacji
+WHERE Ri.[Czy rozpatrzona] = 0
+order by Rezerwacje.data_rezerwacji
+
+create view dbo.[Niezrealizowanie zamowienia] as
+    select top 100 id_zamówienia,data_oczekiwanej_realizacji
+from Zamówienia
+where Zamówienia.data_odebrania is null
+order by data_oczekiwanej_realizacji
