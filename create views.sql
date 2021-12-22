@@ -12,11 +12,19 @@ as
 
 
 create view dbo.[Rezerwacje na dzis] as
-    select *
+    select id_rezerwacji,data_rezerwacji
 from Rezerwacje
 where DAY(data_rezerwacji) = DAY(current_timestamp) and MONTH(data_rezerwacji) = MONTH(current_timestamp) and YEAR(data_rezerwacji) = YEAR(current_timestamp)
 
 create view dbo.[Nierozpatrzone rezerwacje] as
-    select *
-from Rezerwacje_indywidualne Ri
+select top 100 Rezerwacje.id_rezerwacji,id_klienta,liczba_osób
+from Rezerwacje
+    inner join Rezerwacje_indywidualne Ri on Rezerwacje.id_rezerwacji = Ri.id_rezerwacji
 WHERE Ri.[Czy rozpatrzona] = 0
+order by Rezerwacje.data_rezerwacji
+
+create view dbo.[Niezrealizowanie zamowienia] as
+    select top 100 id_zamówienia,data_oczekiwanej_realizacji
+from Zamówienia
+where Zamówienia.data_odebrania is null
+order by data_oczekiwanej_realizacji
