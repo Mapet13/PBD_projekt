@@ -59,6 +59,7 @@ create view dbo.Aktualni_managerowie as
 select * from Aktualni_pracownicy where czy_manager = 1
 
 -- wybierz aktualnie "działające" stoliki (najnowszy opis i liczba miejsc)
+create view dbo.Aktualne_stoliki as
 with tab as
          (
              select s.id_stołu, s.liczba_miejsc, s.opis, s.data_wprowadzenia
