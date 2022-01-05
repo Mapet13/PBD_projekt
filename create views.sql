@@ -87,3 +87,36 @@ create view ilości_produktów_z_owocami_morza_do_zamówienia as
     join [Niezrealizowanie zamowienia] [N z] on Z.id_zamówienia = [N z].id_zamówienia
     where P.czy_zawiera_owoce_morza = 1
     group by P.id_produktu
+
+
+
+--funkcja pomocnicza do poniższego widoku
+create function id_menu_kiedy_dodano_do_menu_dla_produktu (@prod_id int)
+RETURNS int
+as begin
+    Declare @out int
+    select top 1 @out = M.id_menu
+    from Menu_szczegóły MS
+             join Menu M on MS.id_menu = M.id_menu
+             left join (
+        select M2.id_menu, M2.data_wprowadzenia
+        from Menu M2
+        except
+        select M2.id_menu, M2.data_wprowadzenia
+        from Menu M2
+                 join Menu_szczegóły MS2 on M2.id_menu = MS2.id_menu
+        where MS2.id_produktu = @prod_id
+    )
+        as M3 on M3.data_wprowadzenia > M.data_wprowadzenia
+    where MS.id_produktu = @prod_id
+      and M3.id_menu is null
+    order by M.data_wprowadzenia asc
+    return @out
+end
+
+--widok pokazujący produkty aktualnie znajdujące się w menu, wraz z datami dodania do niego 
+create view Aktualne_menu_z_datami_wprowadzenia_produktów as
+select AM.id_produktu, M.data_wprowadzenia
+    from Aktualne_menu AM
+    join Menu M on id_menu = dbo.id_menu_kiedy_dodano_do_menu_dla_produktu(AM.id_produktu)
+    order by M.data_wprowadzenia asc
