@@ -71,3 +71,9 @@ select T1.liczba_miejsc, T1.opis
 from tab T1
          left outer join tab T2 on T1.data_wprowadzenia < T2.data_wprowadzenia and T1.id_stołu = T2.id_stołu
 where T2.id_stołu is null
+
+-- pokaz wszystkie produkty bedace owocami z informacja czy jest aktualnie w menu
+create view Produkty_z_owocami_morza as
+select P.id_produktu, IIF(AM.id_produktu is not null,'tak','nie') as 'Czy jest aktualnie w menu'  from Produkty P
+left outer join Aktualne_menu Am on P.id_produktu = Am.id_produktu
+where P.czy_zawiera_owoce_morza = 1
