@@ -116,7 +116,7 @@ end
 
 --widok pokazujący produkty aktualnie znajdujące się w menu, wraz z datami dodania do niego 
 create view Aktualne_menu_z_datami_wprowadzenia_produktów as
-select AM.id_produktu, M.data_wprowadzenia
+select top 100 percent AM.id_produktu, M.data_wprowadzenia
     from Aktualne_menu AM
     join Menu M on id_menu = dbo.id_menu_kiedy_dodano_do_menu_dla_produktu(AM.id_produktu)
     order by M.data_wprowadzenia asc
