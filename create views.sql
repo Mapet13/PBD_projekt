@@ -77,3 +77,13 @@ create view Produkty_z_owocami_morza as
 select P.id_produktu, IIF(AM.id_produktu is not null,'tak','nie') as 'Czy jest aktualnie w menu'  from Produkty P
 left outer join Aktualne_menu Am on P.id_produktu = Am.id_produktu
 where P.czy_zawiera_owoce_morza = 1
+
+
+-- ilości produktów na niezrealizowanych zamówieniach z owocami morza
+create view ilości_produktów_z_owocami_morza_do_zamówienia as
+    select P.id_produktu,sum(Zs.ilość) as ilość ,min(Z.data_oczekiwanej_realizacji) as 'najpóźniej do' from Produkty P
+    join Zamówienia_szczegóły Zs on P.id_produktu = Zs.id_produktu
+    join Zamówienia Z on Zs.id_zamówienia = Z.id_zamówienia
+    join [Niezrealizowanie zamowienia] [N z] on Z.id_zamówienia = [N z].id_zamówienia
+    where P.czy_zawiera_owoce_morza = 1
+    group by P.id_produktu
