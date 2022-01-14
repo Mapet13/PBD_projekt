@@ -28,7 +28,7 @@ alter table Zamówienia_szczegóły add constraint CK_ilość CHECK (Zamówienia
 
 
 -- nie mozna zmeiniać nic w przeszłości:
-alter table Stoliki_szczegóły add constraint CK_data_wprowadzenia check (data_wprowadzenia > current_timestamp)
+alter table Stoliki_szczegóły add constraint CK_data_wprowadzenia check (data_wprowadzenia >= current_timestamp)
 alter table Stoliki add constraint CK_data_dodania CHECK (data_dodania >= current_timestamp)
 alter table Menu add constraint CK_data_wprowadzenia CHECK (data_wprowadzenia >= current_timestamp)
 alter table Zamówienia add constraint CK_data_złorzenia_zamówienia check (data_złorzenia_zamówienia >= current_timestamp)
