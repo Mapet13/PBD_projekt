@@ -143,11 +143,12 @@ as return
         group by id_produktu
     )
 
-create function Raport_klient(@ID_klienta INT, @data_start datetime = null, @data_end datetime = null)
+create function Raport_zamowienia_klient(@ID_klienta INT, @data_start datetime = null, @data_end datetime = null)
 returns table
 as return
     (
-        select SUM(dbo.Wartość_zamówienia(Z.id_zamówienia)) as 'ilosc wydanych pieniedzy',
+        select COUNT(*) as 'ilosc zamowien',
+               SUM(dbo.Wartość_zamówienia(Z.id_zamówienia)) as 'ilosc wydanych pieniedzy',
                AVG(dbo.Wartość_zamówienia(Z.id_zamówienia)) as 'srednia wartosc zamowienia',
                AVG(DATEPART(hour, Z.data_złorzenia_zamówienia)) as 'zazwyczaj kupuje o tej porze'
         from Zamówienia as Z
@@ -155,3 +156,19 @@ as return
         and (@data_start is null or @data_start <= Z.data_złorzenia_zamówienia)
         and (@data_end is null or @data_end >= Z.data_złorzenia_zamówienia)
     )
+
+create function Raport_zamowienia(@data_start datetime = null, @data_end datetime = null)
+returns table
+as return
+    (
+        select COUNT(*) as 'ilosc zamowien',
+               SUM(dbo.Wartość_zamówienia(Z.id_zamówienia)) as 'ilosc wydanych pieniedzy',
+               MAX(dbo.Wartość_zamówienia(Z.id_zamówienia)) as 'najdrozsze zamowienie',
+               AVG(dbo.Wartość_zamówienia(Z.id_zamówienia)) as 'srednia wartosc zamowienia',
+               AVG(DATEPART(hour,Z.data_złorzenia_zamówienia)) as 'zwykle klienci przychodza o tej porze'
+            from Zamówienia as Z
+        where (@data_start is null or @data_start <= Z.data_złorzenia_zamówienia)
+        and (@data_end is null or @data_end >= Z.data_złorzenia_zamówienia)
+    )
+go
+
