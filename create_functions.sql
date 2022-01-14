@@ -80,3 +80,13 @@ as begin
 end
 
 
+create function Raport_menu(@data_start datetime = null, @data_end datetime = null)
+returns table
+as return
+    (
+        select id_produktu, count(id_produktu) as "ilosc zamowien produktu" from dbo.Zamówienia_szczegóły as Zs
+        join dbo.Zamówienia Z on Zs.id_zamówienia = Z.id_zamówienia
+        where (@data_start is null or @data_start <= Z.data_złorzenia_zamówienia)
+         and  (@data_end is null or @data_end >= Z.data_złorzenia_zamówienia)
+        group by id_produktu
+    )
