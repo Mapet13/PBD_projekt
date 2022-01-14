@@ -1,4 +1,4 @@
-create function Produkty_szczegóły_w_danym_momencie_w_czasie (@when datetime)
+create function Produkty_szczegóły_w_danym_momencie_w_czasie (@when datetime)   -- zwraca ceny produktów, które obowiązywały w momencie @when
 RETURNS table
 as Return (
     with tab as (
@@ -10,7 +10,7 @@ as Return (
     where PS2.data_wprowadzenia is null
     )
 
-create function Stałe_w_danym_momencie_w_czasie (@when datetime)
+create function Stałe_w_danym_momencie_w_czasie (@when datetime)    -- zwraca stałe, które obowiązywały w momencie @when
 RETURNS table
 as Return (
     with tab as (
@@ -23,7 +23,7 @@ as Return (
     )
 
 
-create function Menu_w_danym_momencie_w_czasie (@when datetime)
+create function Menu_w_danym_momencie_w_czasie (@when datetime)     -- zwraca menu, ktore obowiązywało w momencie @when
 RETURNS table
 as Return (
     with tab as (
@@ -36,7 +36,7 @@ as Return (
     )
 
 
-create function Stoliki_szczegóły_w_danym_momencie_w_czasie (@when datetime)
+create function Stoliki_szczegóły_w_danym_momencie_w_czasie (@when datetime)    -- zwraca szczegóły stolików, które obowiązywały w momencie @when
 RETURNS table
 as Return (
     with tab as (
@@ -48,7 +48,7 @@ as Return (
     where PS2.data_wprowadzenia is null
     )
 
-create function Procent_rabatu (@id_rabatu int)
+create function Procent_rabatu (@id_rabatu int)     -- zwraca wielkosc znizki zapewnianej przez dany rabat
 RETURNS float
 as begin
     declare @when datetime
@@ -66,7 +66,7 @@ as begin
 end
 
 
-create function Wartość_zamówienia (@id_zamówienia int)
+create function Wartość_zamówienia (@id_zamówienia int)     -- zlicza łączną wartość produktów należących do danego zamówienia
 RETURNS money
 as begin
     declare @when datetime
@@ -80,9 +80,10 @@ as begin
 end
 
 
+-- Raporty dotyczą danych w przedziale czasowym od @data_start (lub bez ograniczenia dla @data_start = null)
+-- do @data_end (lub do chwili obecnej dla @data_end = null
 
-
-create function Raport_stoliki(@data_start datetime = null, @data_end datetime = null)
+create function Raport_stoliki(@data_start datetime = null, @data_end datetime = null)      -- Raport dotyczacy stolikow
 returns table
 as return (
     select Stoliki.id_stołu,count(Rs.id_rezerwacji) as 'ilosc rezerwacji stolika' from Stoliki
@@ -95,7 +96,7 @@ as return (
 
 
 
-create function Raport_rabaty(@data_start datetime = null, @data_end datetime = null)
+create function Raport_rabaty(@data_start datetime = null, @data_end datetime = null)   -- Raport dotyczacy rabatów
 returns table
 as return (
     select T1.[typ rabatu],[wykorzystane rabaty],[przyznane rabaty] from
@@ -114,7 +115,7 @@ as return (
 
 
 
-create function Raport_rabaty_dla_klienta(@id_klienta int,@data_start datetime = null, @data_end datetime = null)
+create function Raport_rabaty_dla_klienta(@id_klienta int,@data_start datetime = null, @data_end datetime = null)   -- Raport dotyczący rabatów wykorzystanych przez danego klienta
 returns table
 as return (
     select T1.[typ rabatu],[wykorzystane rabaty],[przyznane rabaty] from
@@ -132,7 +133,7 @@ as return (
         group by dbo.Typ_rabatu(id_rabatu)
     ) T2 on T1.[typ rabatu]=T2.[typ rabatu]
 )
-create function Raport_menu(@data_start datetime = null, @data_end datetime = null)
+create function Raport_menu(@data_start datetime = null, @data_end datetime = null)     -- Raport dotyczacy menu oraz tego jak czesto wybierane sa dane produkty
 returns table
 as return
     (
@@ -143,21 +144,8 @@ as return
         group by id_produktu
     )
 
-create function Raport_zamowienia_klient(@ID_klienta INT, @data_start datetime = null, @data_end datetime = null)
-returns table
-as return
-    (
-        select COUNT(*) as 'ilosc zamowien',
-               SUM(dbo.Wartość_zamówienia(Z.id_zamówienia)) as 'ilosc wydanych pieniedzy',
-               AVG(dbo.Wartość_zamówienia(Z.id_zamówienia)) as 'srednia wartosc zamowienia',
-               AVG(DATEPART(hour, Z.data_złorzenia_zamówienia)) as 'zazwyczaj kupuje o tej porze'
-        from Zamówienia as Z
-        where Z.id_klienta = @ID_klienta
-        and (@data_start is null or @data_start <= Z.data_złorzenia_zamówienia)
-        and (@data_end is null or @data_end >= Z.data_złorzenia_zamówienia)
-    )
 
-create function Raport_zamowienia(@data_start datetime = null, @data_end datetime = null)
+create function Raport_zamowienia(@data_start datetime = null, @data_end datetime = null)   -- Raport dotyczacy zamowien
 returns table
 as return
     (
@@ -168,6 +156,20 @@ as return
                AVG(DATEPART(hour,Z.data_złorzenia_zamówienia)) as 'zwykle klienci przychodza o tej porze'
             from Zamówienia as Z
         where (@data_start is null or @data_start <= Z.data_złorzenia_zamówienia)
+        and (@data_end is null or @data_end >= Z.data_złorzenia_zamówienia)
+    )
+
+create function Raport_zamowienia_klient(@ID_klienta INT, @data_start datetime = null, @data_end datetime = null)   -- Raport dotyczacy zamowien skladanych przez danego klienta
+returns table
+as return
+    (
+        select COUNT(*) as 'ilosc zamowien',
+               SUM(dbo.Wartość_zamówienia(Z.id_zamówienia)) as 'ilosc wydanych pieniedzy',
+               AVG(dbo.Wartość_zamówienia(Z.id_zamówienia)) as 'srednia wartosc zamowienia',
+               AVG(DATEPART(hour, Z.data_złorzenia_zamówienia)) as 'zazwyczaj kupuje o tej porze'
+        from Zamówienia as Z
+        where Z.id_klienta = @ID_klienta
+        and (@data_start is null or @data_start <= Z.data_złorzenia_zamówienia)
         and (@data_end is null or @data_end >= Z.data_złorzenia_zamówienia)
     )
 go
