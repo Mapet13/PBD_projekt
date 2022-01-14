@@ -126,3 +126,28 @@ begin
     INSERT INTO Przyznane_rabaty_typu_2 (id_rabatu, data_wykorzystania)
     VALUES (@id, NULL);
 end
+
+
+create procedure Dodaj_rezerwacje_indywidualną(@id_zamówienia int, @liczba_osób int)
+as begin
+    declare @id_klienta int
+    declare @kiedy_zamówiono datetime
+    declare @WK int
+    declare @WZ money
+    declare @data_realizacji datetime
+    declare @WZs varchar(50)
+    select @kiedy_zamówiono=data_złorzenia_zamówienia,@data_realizacji=data_oczekiwanej_realizacji from Zamówienia where id_zamówienia=@id_zamówienia
+    select @Wk = WK,@WZ=WZ from dbo.Stałe_w_danym_momencie_w_czasie(@kiedy_zamówiono)
+    Set @WZs = convert(varchar(50),@WZ,0)
+    select @id_klienta=id_klienta from Zamówienia where id_zamówienia=@id_zamówienia
+    if (select count(id_zamówienia) from Zamówienia where id_klienta = @id_klienta and data_złorzenia_zamówienia < @kiedy_zamówiono) < @WK
+        raiserror('by złorzyć rezerwacje trzeba mieć wcześniej złożonych conajmniej %d zamówień',5,0,@WK)
+    if dbo.Wartość_zamówienia(@id_zamówienia)<@WZ
+        raiserror('rezerwacje można złorzyć wyłącznie do zamówienia za minimum %s zł',5,1,@WZs)
+    if (select data_oczekiwanej_realizacji from Zamówienia where id_zamówienia = @id_zamówienia) < current_timestamp
+        raiserror('nie można złorzyć rezerwacji na zamówienie które już mineło',5,1)
+    insert into Rezerwacje values (@id_klienta,@data_realizacji)
+    declare @id_rezerwacji int
+    set @id_rezerwacji = SCOPE_IDENTITY()
+    insert into Rezerwacje_indywidualne values (@id_rezerwacji,null,@id_zamówienia,@liczba_osób,null,0)
+end
