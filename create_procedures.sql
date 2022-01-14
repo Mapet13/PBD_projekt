@@ -11,3 +11,19 @@ begin
           and Month(@month) = MONTH(data_złorzenia_zamówienia)
           and id_faktury is null
 end
+
+CREATE procedure dodaj_stolik(
+    @liczba_miejsc INT, @opis text, @id_pracownika INT
+)
+AS
+begin
+    DECLARE @id INT;
+
+    INSERT INTO Stoliki (data_dodania, czy_aktualnie_istnieje)
+    VALUES (CURRENT_TIMESTAMP, 1);
+
+    SET @id = SCOPE_IDENTITY();
+
+    INSERT INTO Stoliki_szczegóły (id_stołu, liczba_miejsc, data_wprowadzenia, id_pracownika_dodającego, opis)
+    VALUES (@id, @liczba_miejsc, CURRENT_TIMESTAMP, @id_pracownika, @opis);
+end
