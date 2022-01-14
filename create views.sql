@@ -150,8 +150,8 @@ as begin
 end
 
 --widok pokazujący produkty aktualnie znajdujące się w menu, wraz z datami dodania do niego 
-drop view if exists Najnowsze_menu_z_datami_wprowadzenia_produktów
-create view Najnowsze_menu_z_datami_wprowadzenia_produktów as
+drop view if exists Aktualne_menu_z_datami_wprowadzenia_produktów
+create view Aktualne_menu_z_datami_wprowadzenia_produktów as
 select top 100 percent AM.id_produktu, M.data_wprowadzenia
     from Aktualne_menu AM
     join Menu M on id_menu = dbo.id_menu_kiedy_dodano_do_menu_dla_produktu(AM.id_produktu)

@@ -59,3 +59,23 @@ begin
     INSERT INTO Produkty_szczegóły (id_produktu, cena, data_wprowadzenia, id_pracownika_dodającego)
     VALUES (@product_id, @cena, CURRENT_TIMESTAMP, @id_pracownika);
 end
+
+
+create procedure Dodaj_klienta_firmowego(@email nvarchar(200), @adres nvarchar(200),@NIP varchar(10),@nazwa_firmy nvarchar(200))
+as
+    begin
+        declare @id_klienta int
+        insert into Klienci (data_dodania, email, adres) values (current_timestamp,@email,@adres)
+        set @id_klienta = scope_identity()
+        insert into Klienci_firmowi (NIP, id_klienta, nazwa_firmy) values (@NIP,@id_klienta,@nazwa_firmy)
+    end
+
+
+create procedure Dodaj_klienta_indywidualnego(@email nvarchar(200), @adres nvarchar(200),@imie nvarchar(50), @nazwisko nvarchar(50), @pesel char(11))
+as
+    begin
+        declare @id_klienta int
+        insert into Klienci (data_dodania, email, adres) values (current_timestamp,@email,@adres)
+        set @id_klienta = scope_identity()
+        insert into Klienci_indywidualni (imię, nazwisko, pesel, id_klienta) values (@imie,@nazwisko,@pesel,@id_klienta)
+    end

@@ -80,3 +80,55 @@ as begin
 end
 
 
+
+
+create function Raport_stoliki(@data_start datetime = null, @data_end datetime = null)
+returns table
+as return (
+    select Stoliki.id_stołu,count(Rs.id_rezerwacji) as 'ilosc rezerwacji stolika' from Stoliki
+          join Rezerwacje_stolików Rs on Stoliki.id_stołu = Rs.id_stołu
+          join Rezerwacje R2 on R2.id_rezerwacji = Rs.id_rezerwacji
+          where (@data_start is null or @data_start <=R2.data_rezerwacji)
+            and (@data_end is null or @data_end >=R2.data_rezerwacji)
+          group by Stoliki.id_stołu
+    )
+
+
+
+create function Raport_rabaty(@data_start datetime = null, @data_end datetime = null)
+returns table
+as return (
+    select T1.[typ rabatu],[wykorzystane rabaty],[przyznane rabaty] from
+    (select dbo.Typ_rabatu(Przyznane_rabaty.id_rabatu) as 'typ rabatu', count(id_zamówienia) as 'wykorzystane rabaty'
+     from Przyznane_rabaty
+              join Zamówienia Z on Przyznane_rabaty.id_rabatu = Z.id_rabatu
+     where (@data_start is null or @data_start <= Z.data_złorzenia_zamówienia)
+       and (@data_end is null or @data_end >= Z.data_złorzenia_zamówienia)
+     group by dbo.Typ_rabatu(Przyznane_rabaty.id_rabatu)
+    ) T1 join (select dbo.Typ_rabatu(id_rabatu) as 'typ rabatu', count(id_rabatu) as 'przyznane rabaty' from Przyznane_rabaty
+        where (@data_start is null or @data_start <= Przyznane_rabaty.data_przyznania)
+       and (@data_end is null or @data_end >= Przyznane_rabaty.data_przyznania)
+        group by dbo.Typ_rabatu(id_rabatu)
+    ) T2 on T1.[typ rabatu]=T2.[typ rabatu]
+)
+
+
+
+create function Raport_rabaty_dla_klienta(@id_klienta int,@data_start datetime = null, @data_end datetime = null)
+returns table
+as return (
+    select T1.[typ rabatu],[wykorzystane rabaty],[przyznane rabaty] from
+    (select dbo.Typ_rabatu(Przyznane_rabaty.id_rabatu) as 'typ rabatu', count(id_zamówienia) as 'wykorzystane rabaty'
+     from Przyznane_rabaty
+              join Zamówienia Z on Przyznane_rabaty.id_rabatu = Z.id_rabatu
+     where (@data_start is null or @data_start <= Z.data_złorzenia_zamówienia)
+       and (@data_end is null or @data_end >= Z.data_złorzenia_zamówienia)
+        and Przyznane_rabaty.id_klienta = @id_klienta
+     group by dbo.Typ_rabatu(Przyznane_rabaty.id_rabatu)
+    ) T1 join (select dbo.Typ_rabatu(id_rabatu) as 'typ rabatu', count(id_rabatu) as 'przyznane rabaty' from Przyznane_rabaty
+        where (@data_start is null or @data_start <= Przyznane_rabaty.data_przyznania)
+       and (@data_end is null or @data_end >= Przyznane_rabaty.data_przyznania)
+    and Przyznane_rabaty.id_klienta = @id_klienta
+        group by dbo.Typ_rabatu(id_rabatu)
+    ) T2 on T1.[typ rabatu]=T2.[typ rabatu]
+)
