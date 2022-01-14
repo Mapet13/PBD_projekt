@@ -59,3 +59,51 @@ begin
     INSERT INTO Produkty_szczegóły (id_produktu, cena, data_wprowadzenia, id_pracownika_dodającego)
     VALUES (@product_id, @cena, CURRENT_TIMESTAMP, @id_pracownika);
 end
+
+CREATE procedure dodaj_rabat_typu_manager(
+@id_klienta INT , @procent INT, @id_pracownika INT
+)
+AS
+begin
+    DECLARE @id INT;
+
+    INSERT INTO Przyznane_rabaty (id_klienta, data_przyznania)
+    VALUES (@id_klienta, CURRENT_TIMESTAMP);
+
+    SET @id = SCOPE_IDENTITY();
+
+    INSERT INTO Przyznane_rabaty_typu_manager (id_rabatu, procent, id_pracownika)
+    VALUES (@id, @procent, @id_pracownika);
+end
+
+CREATE procedure dodaj_rabat_typu_1(
+@id_klienta INT
+)
+AS
+begin
+    DECLARE @id INT;
+
+    INSERT INTO Przyznane_rabaty (id_klienta, data_przyznania)
+    VALUES (@id_klienta, CURRENT_TIMESTAMP);
+
+    SET @id = SCOPE_IDENTITY();
+
+    INSERT INTO Przyznane_rabaty_typu_1 (id_rabatu)
+    VALUES (@id);
+end
+
+CREATE procedure dodaj_rabat_typu_2(
+@id_klienta INT
+)
+AS
+begin
+    DECLARE @id INT;
+
+    INSERT INTO Przyznane_rabaty (id_klienta, data_przyznania)
+    VALUES (@id_klienta, CURRENT_TIMESTAMP);
+
+    SET @id = SCOPE_IDENTITY();
+
+    INSERT INTO Przyznane_rabaty_typu_2 (id_rabatu, data_wykorzystania)
+    VALUES (@id, NULL);
+end
