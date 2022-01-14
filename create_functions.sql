@@ -142,3 +142,16 @@ as return
          and  (@data_end is null or @data_end >= Z.data_złorzenia_zamówienia)
         group by id_produktu
     )
+
+create function Raport_klient(@ID_klienta INT, @data_start datetime = null, @data_end datetime = null)
+returns table
+as return
+    (
+        select SUM(dbo.Wartość_zamówienia(Z.id_zamówienia)) as 'ilosc wydanych pieniedzy',
+               AVG(dbo.Wartość_zamówienia(Z.id_zamówienia)) as 'srednia wartosc zamowienia',
+               AVG(DATEPART(hour, Z.data_złorzenia_zamówienia)) as 'zazwyczaj kupuje o tej porze'
+        from Zamówienia as Z
+        where Z.id_klienta = @ID_klienta
+        and (@data_start is null or @data_start <= Z.data_złorzenia_zamówienia)
+        and (@data_end is null or @data_end >= Z.data_złorzenia_zamówienia)
+    )
