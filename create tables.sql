@@ -276,12 +276,20 @@ create table Przyznane_rabaty_typu_manager
 
 
 
+drop table if exists Przyznane_rabaty_typu_1
+create table Przyznane_rabaty_typu_1
+(
+	id_rabatu int
+	primary key (id_rabatu)
+)
 
 
 
 
 
 -- klucze obce:
+
+alter table Przyznane_rabaty_typu_1 add foreign key (id_rabatu) references Przyznane_rabaty(id_rabatu)
 
 
 alter table Przyznane_rabaty_typu_manager add foreign key (id_rabatu) references Przyznane_rabaty(id_rabatu)

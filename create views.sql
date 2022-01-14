@@ -5,6 +5,7 @@ as
             (
             select id_produktu, data_wprowadzenia, cena
                 from Produkty_szczegóły
+                where data_wprowadzenia <= current_timestamp
             )
         select T1.id_produktu,T1.cena from tab T1
         left outer join tab T2 on T1.data_wprowadzenia<T2.data_wprowadzenia and T1.id_produktu = T2.id_produktu
@@ -15,8 +16,11 @@ as
 drop view if exists Aktualne_stałe
 create view Aktualne_stałe -- wyświetla aktualne wartości stałych
 as
-    select T1.* from Stałe T1
-        left outer join Stałe T2 on T1.data_wprowadzenia<T2.data_wprowadzenia
+    with tab as (
+        select * from Stałe where data_wprowadzenia<=current_timestamp
+    )
+    select T1.* from tab T1
+        left outer join tab T2 on T1.data_wprowadzenia<T2.data_wprowadzenia
         where T2.data_wprowadzenia is null;
 
 
@@ -24,9 +28,13 @@ as
 drop view if exists Aktualne_menu;
 create view Aktualne_menu -- wyświetla aktualne menu (id_produktu i jego cena)
 as
-        with tab as
+        with Mtab as (
+            select *
+            from Menu where data_wprowadzenia <=current_timestamp
+        )
+        ,tab as
             (
-            select M1.id_menu from Menu M1 left outer join Menu M2 on M1.data_wprowadzenia < M2.data_wprowadzenia
+            select M1.id_menu from Mtab M1 left outer join Mtab M2 on M1.data_wprowadzenia < M2.data_wprowadzenia
                 where M2.id_menu is null
             )
         select Acp.id_produktu,Acp.cena from tab
@@ -67,7 +75,7 @@ drop view if exists dbo.Aktialni_pracownicy
 create view dbo.Aktialni_pracownicy as
 select *
 from Pracownicy
-WHERE data_zwolnienia IS NULL
+WHERE (data_zwolnienia IS NULL or data_zwolnienia > current_timestamp)
   AND data_zatrudnienia <= current_timestamp
 
 
@@ -81,12 +89,12 @@ select * from Aktualni_pracownicy where czy_manager = 1
 -- wybierz aktualnie "działające" stoliki (najnowszy opis i liczba miejsc)
 drop view if exists dbo.Aktualne_stoliki
 create view dbo.Aktualne_stoliki as
-with tab as
+    with tab as
          (
              select s.id_stołu, s.liczba_miejsc, s.opis, s.data_wprowadzenia
              from Stoliki_szczegóły as s
 			 LEFT OUTER JOIN stoliki on s.id_stołu = stoliki.id_stołu
-			 where stoliki.czy_aktualnie_istnieje = 1
+			 where stoliki.czy_aktualnie_istnieje = 1 and data_wprowadzenia < current_timestamp
          )
 select T1.liczba_miejsc, T1.opis
 from tab T1
@@ -142,8 +150,8 @@ as begin
 end
 
 --widok pokazujący produkty aktualnie znajdujące się w menu, wraz z datami dodania do niego 
-drop view if exists Aktualne_menu_z_datami_wprowadzenia_produktów
-create view Aktualne_menu_z_datami_wprowadzenia_produktów as
+drop view if exists Najnowsze_menu_z_datami_wprowadzenia_produktów
+create view Najnowsze_menu_z_datami_wprowadzenia_produktów as
 select top 100 percent AM.id_produktu, M.data_wprowadzenia
     from Aktualne_menu AM
     join Menu M on id_menu = dbo.id_menu_kiedy_dodano_do_menu_dla_produktu(AM.id_produktu)
