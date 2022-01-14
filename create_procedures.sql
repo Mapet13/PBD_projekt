@@ -27,3 +27,19 @@ begin
     INSERT INTO Stoliki_szczegóły (id_stołu, liczba_miejsc, data_wprowadzenia, id_pracownika_dodającego, opis)
     VALUES (@id, @liczba_miejsc, CURRENT_TIMESTAMP, @id_pracownika, @opis);
 end
+
+CREATE procedure dodaj_produkt(
+    @nazwa nvarchar(50), @czy_zawiera_produkt_morza bit, @id_kategorii int, @cena int, @id_pracownika int
+)
+AS
+begin
+    DECLARE @product_id INT;
+
+    INSERT INTO Produkty (nazwa, czy_zawiera_owoce_morza, id_kategorii, data_dodania)
+    VALUES (@nazwa, @czy_zawiera_produkt_morza, @id_kategorii, CURRENT_TIMESTAMP);
+
+    SET @product_id = SCOPE_IDENTITY();
+
+    INSERT INTO Produkty_szczegóły (id_produktu, cena, data_wprowadzenia, id_pracownika_dodającego)
+    VALUES (@product_id, @cena, CURRENT_TIMESTAMP, @id_pracownika);
+end
