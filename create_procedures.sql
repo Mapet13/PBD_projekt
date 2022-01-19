@@ -127,7 +127,35 @@ begin
     VALUES (@id);
 end
 
-create procedure Dodaj_rezerwacje_indywidualną(@id_zamówienia int, @liczba_osób int)
+create type lista_osób as table
+(
+    id_osoby int
+)
+create type lista_stolików as table
+(
+    id_stołu int
+)
+
+create procedure Dodaj_rezerwacje_firmową(@id_klienta int, @osoby lista_osób readonly , @stoliki lista_stolików readonly , @data_rezerwacji datetime)
+as begin
+    declare @godzina_otwarcia time
+    declare @godzina_zamknięcia time
+    select @godzina_otwarcia = godzina_otwarcia, @godzina_zamknięcia = godzina_zamknięcia from Stałe_w_danym_momencie_w_czasie(@data_rezerwacji)
+    if @data_rezerwacji < current_timestamp
+        raiserror('nie można złorzyć rezerwacji na datę która już mineła',5,1)
+    if @godzina_otwarcia is not null and  cast(@data_rezerwacji as time) < @godzina_otwarcia
+        raiserror('nie można złorzyć rezerwacji na zamówienie przed otwarciem restauracji',5,1)
+    if @godzina_zamknięcia is not null and  cast(@data_rezerwacji as time) > @godzina_zamknięcia
+        raiserror('nie można złorzyć rezerwacji na zamówienie po zamknięciu restauracji',5,1)
+    insert into Rezerwacje values (@id_klienta,@data_rezerwacji)
+    declare @id_rezerwacji int
+    set @id_rezerwacji = SCOPE_IDENTITY()
+    insert into Rezerwacje_osoby select @id_rezerwacji,id_osoby from @osoby
+    insert into Rezerwacje_stolików select id_stołu,@id_rezerwacji from @stoliki
+end
+
+
+create procedure Dodaj_rezerwacje_indywidualną(@id_zamówienia int, @liczba_osób int, @stoliki lista_stolików readonly )
 as begin
     declare @id_klienta int
     declare @kiedy_zamówiono datetime
@@ -155,6 +183,7 @@ as begin
     declare @id_rezerwacji int
     set @id_rezerwacji = SCOPE_IDENTITY()
     insert into Rezerwacje_indywidualne values (@id_rezerwacji,null,@id_zamówienia,@liczba_osób,null,0)
+    insert into Rezerwacje_stolików select id_stołu,@id_rezerwacji from @stoliki
 end
 
 
