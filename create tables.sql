@@ -201,8 +201,7 @@ create table Przyznane_rabaty
 drop table if exists Przyznane_rabaty_typu_2
 create table Przyznane_rabaty_typu_2
 (
-	id_rabatu int,
-	data_wykorzystania datetime null
+	id_rabatu int
 
 	primary key (id_rabatu)
 )

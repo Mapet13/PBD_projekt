@@ -123,8 +123,8 @@ begin
 
     SET @id = SCOPE_IDENTITY();
 
-    INSERT INTO Przyznane_rabaty_typu_2 (id_rabatu, data_wykorzystania)
-    VALUES (@id, NULL);
+    INSERT INTO Przyznane_rabaty_typu_2 (id_rabatu)
+    VALUES (@id);
 end
 
 create procedure Dodaj_rezerwacje_indywidualną(@id_zamówienia int, @liczba_osób int)
