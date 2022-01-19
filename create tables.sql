@@ -39,11 +39,12 @@ create table Rezerwacje_indywidualne
 	data_akceptacji datetime,
 	id_zamówienia int,
 	liczba_osób int,
-	id_pracownika_zatwierdzającego int
+	id_pracownika_zatwierdzającego int,
+	[Czy rozpatrzona] bit default 0
 
 	primary key (id_rezerwacji)
 )
-
+ 
 drop table if exists Menu
 create table Menu
 (
@@ -240,7 +241,11 @@ create table Stałe
 	R2 float,
 	D1 int,
 	data_wprowadzenia datetime default current_timestamp,
-	id_pracownika_wprowadzającego int
+	id_pracownika_wprowadzającego int,
+    godzina_otwarcia                     time,
+    godzina_zamknięcia                   time,
+    minimalna_ilośc_rotowanych_produktów float,
+    dni_dla_zmiany_menu                 int
 
 	primary key (data_wprowadzenia)
 )
@@ -351,4 +356,3 @@ alter table Rezerwacje add foreign key (id_klienta) references Klienci(id_klient
 alter table Produkty add foreign key (id_kategorii) references Kategorie_produktów(id_kategorii)
 
 
-alter table Rezerwacje_indywidualne	add [Czy rozpatrzona] bit default 0

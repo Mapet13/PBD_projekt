@@ -14,6 +14,11 @@ alter table Pracownicy add constraint CK_email_pracownicy CHECK (email like '%_@
 alter table Stałe add constraint CK_R1 check (R1>=0 and R1<= 100)
 alter table Stałe add constraint CK_R2 check (R2>=0 and R2<= 100)
 alter table Przyznane_rabaty_typu_manager add constraint CK_procent CHECK (procent >= 0 AND procent <= 100)
+alter table Stałe add constraint CK_minimalna_ilośc_rotowanych_produktów check (minimalna_ilośc_rotowanych_produktów>=0 and minimalna_ilośc_rotowanych_produktów<= 100)
+
+
+-- godzina otwarcia musi być przed godziną zamkniecia
+alter table Stałe add constraint CK_godziny_otwarcia check (godzina_otwarcia is null or godzina_zamknięcia is null or godzina_otwarcia<godzina_zamknięcia)
 
 -- ilośc nie moze byc ujemna
 alter table Stałe add constraint CK_WZ check (WZ>=0)
@@ -22,6 +27,7 @@ alter table Stałe add constraint CK_Z1 check (Z1>=0)
 alter table Stałe add constraint CK_K1 check (K1>=0)
 alter table Stałe add constraint CK_K2 check (K2>=0)
 alter table Stałe add constraint CK_D1 check (D1>=0)
+alter table Stałe add constraint CK_dni_do_zmiany_menu check (dni_do_zmiany_menu>0)
 alter table Produkty_szczegóły add constraint CK_cena check (cena > 0)
 alter table Stoliki_szczegóły add constraint CK_liczba_miejsc check (liczba_miejsc>0)
 alter table Zamówienia_szczegóły add constraint CK_ilość CHECK (Zamówienia_szczegóły.ilość >= 0)
