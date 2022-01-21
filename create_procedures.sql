@@ -198,6 +198,8 @@ create type tabela_produktów_na_zamówieniu as table
         id_produktu int,
         ilość int check (ilość>0)
     )
+    
+drop procedure if exists złóż_zamówienie
 create procedure złóż_zamówienie
 (
     @tabela_produkty tabela_produktów_na_zamówieniu readonly,
@@ -218,7 +220,10 @@ as begin
     select @godzina_zamknięcia = godzina_zamknięcia, @godzina_otwarcia = godzina_otwarcia from Aktualne_stałe;
     if @id_klienta not in (select id_klienta from Klienci)
         raiserror('nie ma takiego klienta',5,1)
-    if  @id_rabatu is not null and  @id_rabatu in (select  id_rabatu from Zamówienia)
+    if  @id_rabatu is not null and (not @id_rabatu in (select id_rabatu from Przyznane_rabaty where id_klienta = @id_klienta))
+        raiserror('nie można wykorzystać rabatu innego klienta',5,2)
+
+    if  @id_rabatu is not null and (not @id_rabatu in (select id_rabatu from Przyznane_rabaty_typu_1)) and  @id_rabatu in (select  id_rabatu from Zamówienia)
         raiserror('zabat został już wykorzystany',5,2)
     if @id_rabatu in (select id_rabatu from Przyznane_rabaty_typu_2)
         begin
@@ -248,6 +253,33 @@ as begin
     insert into Zamówienia values (current_timestamp,@czy_na_wynos,@id_rabatu,@data_oczekiwanej_realizacji,null,@id_klienta,@data_płatności,@czy_przez_internet)
     set @id_zamówienia = scope_identity()
     insert into Zamówienia_szczegóły select @id_zamówienia,id_produktu,ilość from @tabela_produkty
+
+
+    declare @Z1 int
+    declare @K1 money
+    declare @K2 money
+    select @Z1=Z1,@K1=K1,@K2=K2 from Aktualne_stałe;
+
+    if(select count(Przyznane_rabaty.id_rabatu) from Przyznane_rabaty join Przyznane_rabaty_typu_1 t on Przyznane_rabaty.id_rabatu = t.id_rabatu where id_klienta = @id_klienta) = 0
+        begin
+            declare @ilość_zamowień_do_rabatu_typu_1 int
+            select @ilość_zamowień_do_rabatu_typu_1 = count(id_zamówienia) from Zamówienia where id_klienta=@id_klienta and dbo.Wartość_zamówienia(id_zamówienia) >= @K1
+            if(@ilość_zamowień_do_rabatu_typu_1 >= @Z1)
+                exec dbo.dodaj_rabat_typu_1 @id_klienta
+        end
+
+
+    declare @data_ostatniego_rabatu_typu_2 datetime
+    select @data_ostatniego_rabatu_typu_2 = PR1.data_przyznania from Przyznane_rabaty PR1
+        join Przyznane_rabaty_typu_2 PRT21 on PR1.id_rabatu = Prt21.id_rabatu
+        left outer join Przyznane_rabaty PR2 on PR1.data_przyznania<PR2.data_przyznania
+        join Przyznane_rabaty_typu_2 PRt22 on PR2.id_rabatu = PRt22.id_rabatu
+        where PR2.id_rabatu is null and PR1.id_klienta = @id_klienta and Pr2.id_klienta = @id_klienta
+    declare @wartość_zamowień_do_rabatu_typu_2 money
+    select @wartość_zamowień_do_rabatu_typu_2 =  sum(dbo.Wartość_zamówienia(id_zamówienia)) from Zamówienia where data_złorzenia_zamówienia > @data_ostatniego_rabatu_typu_2
+        and id_klienta = @id_klienta
+    if(@wartość_zamowień_do_rabatu_typu_2 >= @K2)
+        exec dbo.dodaj_rabat_typu_2 @id_klienta
 
     set @wartość_zamówienia = dbo.Wartość_zamówienia(@id_zamówienia)
 end

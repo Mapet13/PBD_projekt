@@ -182,8 +182,7 @@ as
             (select Prt1.id_rabatu, (select R1 from Stałe_w_danym_momencie_w_czasie(data_przyznania)) as procent, null as data_wygaśnięcia
              from Przyznane_rabaty_typu_1 Prt1
                       join Przyznane_rabaty Pr on Pr.id_rabatu = Prt1.id_rabatu
-            left outer join Zamówienia Z on Pr.id_rabatu = Z.id_rabatu
-             where Pr.id_klienta = @id_klienta and Z.id_zamówienia is null)
+             where Pr.id_klienta = @id_klienta)
             union
             (
                 select Prt2.id_rabatu, (select R2 from Stałe_w_danym_momencie_w_czasie(data_przyznania))  as procent, dateadd(d,(select D1 from Stałe_w_danym_momencie_w_czasie(data_przyznania)),data_przyznania) as data_wygaśnięcia
