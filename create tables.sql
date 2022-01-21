@@ -27,7 +27,8 @@ create table Rezerwacje
 (
 	id_rezerwacji int identity,
 	id_klienta int,
-	data_rezerwacji datetime
+	data_rezerwacji datetime,
+	data_dodania datetime default current_timestamp
 	
 	primary key (id_rezerwacji)
 )
