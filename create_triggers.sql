@@ -1,3 +1,7 @@
+
+--triggery pełnią rolę check-ów międzytabelowych
+
+
 create trigger Tr_rezerwacje_indywidualne_data_akceptacji on Rezerwacje_indywidualne
     before INSERT ,UPDATE
     AS
